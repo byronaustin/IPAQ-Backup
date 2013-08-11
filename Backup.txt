@@ -1,0 +1,155 @@
+var now = Date();
+var ext, r
+
+function App_Open(){
+r = MkDir("\\Storage Card\\Backup");
+r = MkDir("\\Storage Card\\Archive");
+r = MkDir("\\my documents\\Backup");
+Text1.Text = "";
+Text2.Text = "";
+Progress1.Visible = false;
+ now = now.substr(4,6) + "." + Right(now,2) + "_"
+ if (Left(now,3)== "Jan"){now = "01." + Right(now,6);}
+ if (Left(now,3)== "Feb"){now = "02." + Right(now,6);}
+ if (Left(now,3)== "Mar"){now = "03." + Right(now,6);}
+ if (Left(now,3)== "Apr"){now = "04." + Right(now,6);}
+ if (Left(now,3)== "May"){now = "05." + Right(now,6);}
+ if (Left(now,3)== "Jun"){now = "06." + Right(now,6);}
+ if (Left(now,3)== "Jul"){now = "07." + Right(now,6);}
+ if (Left(now,3)== "Aug"){now = "08." + Right(now,6);}
+ if (Left(now,3)== "Sep"){now = "09." + Right(now,6);}
+ if (Left(now,3)== "Oct"){now = "10." + Right(now,6);}
+ if (Left(now,3)== "Nov"){now = "11." + Right(now,6);}
+ if (Left(now,3)== "Dec"){now = "12." + Right(now,6);}
+ Image1.Caption = "Loading File Types";
+ List1.Visible = false;
+ Text1.Visible = false;
+ Text2.Visible = false;
+ go("form2");
+ cmdBackup.Visible = false;
+ //go("form1");
+ cmdExtension_Click()
+ Image1.Tool = 0
+ Alert("Select file types to backup and click Backup button");
+ cmdBackup.Visible = true;
+
+}
+
+function cmdBackup_Click() {
+ var s, t, u, j, result;
+ List1.Clear();
+ List1.Visible = true;
+ Text1.Visible = true;
+ Text2.Visible = true;
+ Image1.Caption = "Backing up Files, Please Wait..."
+ j = List2.NumItems-1;
+ for(i=j;i>-1;i--)
+ { 
+  if (List2.ItemSelected(i) == true)
+  { 
+   ext = (List2.GetItemString(i));
+   go ("form2")
+
+   t = "\\my documents\\"
+   s = findfirst("\\my documents\\*" + ext ,0);
+   while (s != "") {
+     List1.additem(s);
+     u = "\\my documents\\Backup\\" + s + ".BKU";
+     Image1.Caption = "Backing up " + u;
+     go("form2")
+     CopyFile(t+s, u);
+     Text1.Text = s
+     Text2.Text = u
+     s = findnext();
+   }
+
+   t = "\\Storage Card\\Backup\\"
+   s = findfirst("\\Storage Card\\Backup\\*" + ext + ".BKU" ,0);
+   while (s != "") {
+     u = "\\Storage Card\\Archive\\" + s;
+     Image1.Caption = "Backing up " + u;
+     go("form2")
+     CopyFile(t+s, u);
+     result = DeleteFile(t+s);
+     if (result == 0){Alert("Delete Failed" + t+s)};
+     Text1.Text = s
+     Text2.Text = u
+     s = findnext();
+    }
+
+
+
+   t = "\\my documents\\"
+   s = findfirst("\\my documents\\*" + ext ,0);
+   while (s != "") {
+     u = "\\Storage Card\\Backup\\" + now + s + ".BKU";
+     CopyFile(t+s, u);
+     Text1.Text = s
+     Text2.Text = u
+     s = findnext();
+   }
+  }
+ }
+ go ("form1")
+}
+
+function Left(str, n){
+  if (n <= 0)
+	    return "";
+	else if (n > String(str).length)
+	    return str;
+	else
+	    return String(str).substring(0,n);
+}
+function Right(str, n){
+    if (n <= 0)
+       return "";
+    else if (n > String(str).length)
+       return str;
+    else {
+       var iLen = String(str).length;
+       return String(str).substring(iLen, iLen - n);
+    }
+}
+
+function ImageBox1_Click() {
+  Image1.Toggle = true;
+  if (Image1.Checked == True)
+    Image1.Checked = false;
+  else
+    Image1.Checked = true;
+}
+
+function List2_Single(){
+ var i,j,a,s,s1;
+ j = List2.NumItems-2;
+ for(i=j;i>-1;i--)
+ {
+  Progress1.Visible = true;
+  Progress1.SetRange(0,j);
+  Progress1.SetStep(1);
+  Progress1.StepIt();
+  s=(List2.GetItemString(i+1));
+  s1=(List2.GetItemString(i));
+  if(s==s1)
+  {
+   List2.RemoveItem(i);
+  }
+ }
+ Progress1.Visible = false;
+}
+
+function cmdExtension_Click() {
+  var s, t, u;
+  go("form2");
+  List1.Clear();
+  t = "\\my documents\\"
+  s = findfirst("\\my documents\\*.*",0);
+  while (s != "") {
+    u = Right(s,4);
+    List2.additem(u);
+    s = findnext();
+  }
+  List2_Single()
+  go("form1");
+}
